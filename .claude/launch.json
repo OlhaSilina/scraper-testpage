@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ad-test",
+      "runtimeExecutable": "C:\\Claude\\ad_reachability_checker\\python_embed\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "8000"],
+      "port": 8000
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sponsored</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    /* The ad creative. NOTE: there is deliberately NO href / target URL
+       anywhere in this markup. The destination is assembled in JS on click. */
+    .creative {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      min-height: 250px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #fff;
+      background: linear-gradient(135deg, #5b2bd6 0%, #c0392b 100%);
+      position: relative;
+    }
+    .badge {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .75;
+    }
+    .headline { font-size: 26px; font-weight: 800; margin: 0 12px; }
+    .sub { font-size: 14px; opacity: .9; margin-top: 6px; }
+    .cta {
+      margin-top: 16px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: #fff;
+      color: #5b2bd6;
+      font-weight: 700;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- JS-secure creative: clickable, but the markup carries no destination. -->
+  <div class="creative" id="ad" role="button" aria-label="Advertisement">
+    <span class="badge">Ad</span>
+    <p class="headline">⚡ MEGA SALE — 70% OFF</p>
+    <p class="sub">Limited time offer. Tap to claim your deal.</p>
+    <span class="cta">Shop now →</span>
+  </div>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Config arrives from the publisher page via postMessage, because
+    // this iframe runs in an opaque (cross-origin) sandbox and cannot
+    // read the parent's JS directly.
+    //
+    // We never keep the destination as a ready-to-use string: it is
+    // stored obfuscated (base64) and only decoded + assembled at the
+    // moment of the click. This mimics a "JS-secure" ad tag.
+    // ---------------------------------------------------------------
+    var enc = '';          // base64 of the counter base URL
+    var method = 'window.open';
+    var slotId = 'slot-1';
+
+    function send(type, payload) {
+      payload = payload || {};
+      payload.type = type;
+      try { parent.postMessage(payload, '*'); } catch (e) {}
+    }
+
+    window.addEventListener('message', function (ev) {
+      var d = ev.data || {};
+      if (d.type !== 'config') return;
+      // Store the destination obfuscated, not in the clear.
+      enc = d.target ? btoa(d.target) : '';
+      method = d.method || 'window.open';
+      slotId = d.id || slotId;
+      send('ready', { id: slotId, hasTarget: !!enc, method: method });
+    });
+
+    function buildTarget() {
+      if (!enc) return null;
+      // Decode + assemble only now, at click time.
+      var base = atob(enc);
+      var nonce = (Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+      var sep = base.indexOf('?') === -1 ? '?' : '&';
+      var url = base + sep + 'slot=' + encodeURIComponent(slotId) +
+                '&cb=' + Date.now() + '&nonce=' + nonce;
+      return { url: url, nonce: nonce };
+    }
+
+    function deliver(url) {
+      switch (method) {
+        case 'anchor': {
+          var a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          break;
+        }
+        case 'location':
+          // Needs allow-top-navigation-by-user-activation on the sandbox.
+          window.location.href = url;
+          break;
+        case 'beacon':
+          if (navigator.sendBeacon) navigator.sendBeacon(url);
+          else fetch(url, { mode: 'no-cors', keepalive: true });
+          break;
+        case 'image':
+          var img = new Image();
+          img.src = url;
+          break;
+        case 'fetch':
+          fetch(url, { mode: 'no-cors' });
+          break;
+        case 'window.open':
+        default:
+          window.open(url, '_blank');
+      }
+    }
+
+    document.getElementById('ad').addEventListener('click', function () {
+      var t = buildTarget();
+      if (!t) {
+        send('click', { ok: false, reason: 'no-target-configured' });
+        return;
+      }
+      // Report the intended request to the parent BEFORE firing it,
+      // so the test page records the nonce even if the request is blocked.
+      send('click', { ok: true, url: t.url, nonce: t.nonce, method: method });
+      deliver(t.url);
+    });
+
+    // Announce we are loaded; parent will respond with config.
+    send('loaded', {});
+  </script>
+</body>
+</html>

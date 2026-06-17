@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ad Scraper Test Pages</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Ad Scraper Test Pages</h1>
+  <p class="muted">
+    A set of static pages for testing whether an ad scraper truly intercepts
+    click requests instead of letting them reach the outside world. Each page
+    serves an ad inside a <strong>cross-origin sandboxed iframe</strong> whose
+    target URL is not in the markup — it is assembled in JavaScript at click
+    time ("JS-secure").
+  </p>
+
+  <div class="note">
+    <strong>How to use:</strong> pick a page by click method below and append
+    your own counter URL as <code>?target=&lt;your-counter-url&gt;</code>
+    (e.g. a <a href="https://webhook.site" target="_blank" rel="noopener">webhook.site</a> URL).
+    Then hand that full link to your scraper. Click activity is logged to the
+    browser DevTools console (prefix <code>[ad-test]</code>) — nothing is shown
+    on the page.
+  </div>
+
+  <h2>Pages by click-delivery method</h2>
+  <p class="muted">Each method produces a different type of network request the scraper must intercept.</p>
+  <ul class="menu">
+    <li>
+      <a href="window-open.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">window-open.html</a>
+      <span class="desc"><code>window.open(url)</code> — opens the target in a new tab/popup navigation.</span>
+    </li>
+    <li>
+      <a href="anchor.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">anchor.html</a>
+      <span class="desc">Programmatic click on a dynamically created <code>&lt;a href&gt;</code> — classic ad click.</span>
+    </li>
+    <li>
+      <a href="location.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">location.html</a>
+      <span class="desc"><code>location.href = url</code> — top-level navigation.</span>
+    </li>
+    <li>
+      <a href="beacon.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">beacon.html</a>
+      <span class="desc"><code>navigator.sendBeacon(url)</code> — beacon request.</span>
+    </li>
+    <li>
+      <a href="image.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">image.html</a>
+      <span class="desc"><code>new Image().src = url</code> — tracking-pixel GET.</span>
+    </li>
+    <li>
+      <a href="fetch.html?target=https://webhook.site/REPLACE-WITH-YOUR-UUID">fetch.html</a>
+      <span class="desc"><code>fetch(url, {mode:'no-cors'})</code> — fetch/XHR request.</span>
+    </li>
+  </ul>
+
+  <h2>How the test works</h2>
+  <p class="muted">
+    Each click builds a URL containing a unique <code>nonce</code>. If the
+    scraper intercepts the click correctly, no request reaches your counter
+    (the <code>nonce</code> never shows up there). If it leaks, you see a hit
+    with that <code>nonce</code> — proof the request escaped. Without a
+    <code>?target=</code>, clicks do nothing (a warning is logged to the console).
+  </p>
+</body>
+</html>

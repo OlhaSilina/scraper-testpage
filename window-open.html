@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily News — Test Publisher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <span class="method-tag">click method: window.open()</span>
+  <h1>The Daily Bulletin</h1>
+
+  <div class="article">
+    <p>Welcome to our publisher page. Below is an advertisement served inside a
+       cross-origin sandboxed iframe. The destination URL is not present in the
+       markup — it is assembled in JavaScript at click time ("JS-secure").</p>
+
+    <div class="ad-slot" id="ad-slot"></div>
+
+    <p>The rest of the article continues here so the page resembles a real
+       publisher layout.</p>
+  </div>
+
+  <script>window.CLICK_METHOD = 'window.open';</script>
+  <script src="publisher.js"></script>
+</body>
+</html>

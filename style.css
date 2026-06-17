@@ -1,0 +1,67 @@
+/* Shared styles for the ad-scraper test pages. */
+:root { color-scheme: light dark; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  line-height: 1.5;
+}
+
+h1 { font-size: 22px; }
+h2 { font-size: 18px; }
+.muted { opacity: .7; font-size: 14px; }
+
+code {
+  background: #8882;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.method-tag {
+  display: inline-block;
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: #5b2bd6;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.article p { margin: 12px 0; }
+
+.ad-slot {
+  border: 1px dashed #8886;
+  border-radius: 10px;
+  padding: 6px;
+  margin: 22px 0;
+}
+.ad-slot iframe {
+  width: 300px;
+  height: 250px;
+  border: 0;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Landing / menu */
+.menu { list-style: none; padding: 0; }
+.menu li {
+  border: 1px solid #8884;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+.menu a { font-weight: 700; text-decoration: none; }
+.menu .desc { display: block; font-size: 13px; opacity: .75; margin-top: 4px; }
+
+.note {
+  border-left: 3px solid #5b2bd6;
+  padding: 8px 12px;
+  background: #5b2bd60d;
+  border-radius: 6px;
+  font-size: 14px;
+  margin: 18px 0;
+}
