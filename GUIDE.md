@@ -128,10 +128,35 @@ a hit appears on any method, there is a hole there.
 
 ---
 
+## Confirming the click actually fired (DOM click-marker)
+
+A scraper may only surface a captured URL for the delivery methods it hooks (often
+just `window.open`). For the others its output can be empty — which is ambiguous:
+did it intercept the request, or did it never click?
+
+To remove that ambiguity, the ad writes a marker into its own DOM (inside the
+`ad.html` frame) **at click time**: a hidden `<div id="click-marker">` whose
+`data-clicks` attribute lists `method:nonce` for every click. The scraper dumps
+this frame's DOM, so it captures the marker regardless of which API it hooks.
+
+- The marker stores **only the nonce token + method — never the destination URL** —
+  and only after the click. So before the click there is still no target in the
+  markup (the ad stays "JS-secure"), and a scraper that clicks only when it finds no
+  explicit target URL still clicks. A bare nonce is not a navigable link, so it
+  cannot be harvested as the target instead of clicking.
+
+Use it like this, per method:
+- `data-clicks` contains `method:<nonce>` → the click fired.
+- that `<nonce>` is **absent** on webhook.site → request intercepted ✅
+- that `<nonce>` **appears** on webhook.site → request leaked ❌
+- `#click-marker` is **absent** from the frame dump → the scraper never clicked this
+  method (so "no hit" proves nothing — it didn't exercise the path).
+
 ## How to read the results (summary)
 
-- Main criterion: **nothing new on webhook.site after the scraper's click = success**.
-  A new entry = the request leaked out.
+- Main criterion: **nothing new on webhook.site after the scraper's click = success**,
+  **but only if the click actually fired** — confirm via the `#click-marker` nonce
+  above. A new entry on webhook.site = the request leaked out.
 - **`nonce`** — a one-time unique click marker. During the manual baseline (your own
   browser) you can match the console `nonce` to the webhook.site entry. For the
   scraper run you cannot read its console, so you just watch for any new hit; the

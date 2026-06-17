@@ -163,12 +163,40 @@
       }
     }
 
+    // Scraper-readable proof that the click handler ran, written into the DOM
+    // (the scraper dumps this frame's DOM, so it sees the marker). We store ONLY
+    // the nonce token + method — NEVER the full destination URL — and only at
+    // click time. This keeps the ad "JS-secure": before the click there is no
+    // target in the markup, so a scraper that clicks only when it finds no
+    // explicit target URL still clicks. A bare nonce is not a navigable link,
+    // so it cannot be harvested as the target instead of clicking.
+    function recordClick(token) {
+      try {
+        var m = document.getElementById('click-marker');
+        if (!m) {
+          m = document.createElement('div');
+          m.id = 'click-marker';
+          m.style.display = 'none';
+          document.body.appendChild(m);
+        }
+        var prev = m.getAttribute('data-clicks');
+        var next = (prev ? prev + ',' : '') + token;
+        m.setAttribute('data-clicks', next);
+        m.textContent = next;
+      } catch (e) {}
+    }
+
     document.getElementById('ad').addEventListener('click', function () {
       var t = buildTarget();
       if (!t) {
+        // Marker still records the attempt (no nonce — nothing was assembled).
+        recordClick(method + ':no-target');
         send('click', { ok: false, reason: 'no-target-configured' });
         return;
       }
+      // DOM marker: nonce only, no URL. Proves the click fired regardless of
+      // which delivery API the scraper does or does not hook.
+      recordClick(method + ':' + t.nonce);
       // Report the intended request to the parent BEFORE firing it,
       // so the test page records the nonce even if the request is blocked.
       send('click', { ok: true, url: t.url, nonce: t.nonce, method: method });
