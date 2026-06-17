@@ -124,6 +124,39 @@
         case 'fetch':
           fetch(url, { mode: 'no-cors' });
           break;
+        case 'ping': {
+          // Hyperlink auditing: the browser sends a separate POST to the ping
+          // URL when the link is followed. href=about:blank isolates the ping
+          // request (no extra GET to the counter via href).
+          var p = document.createElement('a');
+          p.href = 'about:blank';
+          p.setAttribute('ping', url);
+          document.body.appendChild(p);
+          p.click();
+          p.remove();
+          break;
+        }
+        case 'xhr': {
+          var x = new XMLHttpRequest();
+          x.open('GET', url);
+          x.send();
+          break;
+        }
+        case 'script': {
+          // How real ad tags load. The response is not valid JS, so it may log
+          // a parse error — but the GET request still goes out.
+          var s = document.createElement('script');
+          s.src = url;
+          document.body.appendChild(s);
+          break;
+        }
+        case 'iframe': {
+          var f = document.createElement('iframe');
+          f.src = url;
+          f.style.display = 'none';
+          document.body.appendChild(f);
+          break;
+        }
         case 'window.open':
         default:
           window.open(url, '_blank');

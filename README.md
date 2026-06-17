@@ -13,7 +13,8 @@ points at an external counter service. If the scraper intercepts the click,
 
 - `index.html` — landing/menu listing the per-method pages (no config UI).
 - `window-open.html`, `anchor.html`, `location.html`, `beacon.html`,
-  `image.html`, `fetch.html` — one publisher page per click-delivery method.
+  `image.html`, `fetch.html`, `ping.html`, `xhr.html`, `script.html`,
+  `iframe.html` — one publisher page per click-delivery method.
 - `publisher.js` — shared logic: reads `?target=`, embeds the ad, logs to console.
 - `ad.html` — shared JS-secure creative: the target URL is stored obfuscated
   (base64) and decoded/assembled only at click time.
@@ -48,7 +49,14 @@ intercept some and miss others, so test several:
 | `location.html`     | `location.href = url`                  | top-navigation   |
 | `beacon.html`       | `navigator.sendBeacon(url)`            | beacon           |
 | `image.html`        | `new Image().src = url`                | image GET        |
-| `fetch.html`        | `fetch(url, {mode:'no-cors'})`         | fetch/XHR        |
+| `fetch.html`        | `fetch(url, {mode:'no-cors'})`         | fetch            |
+| `ping.html`         | `<a ping>` hyperlink auditing          | ping (POST)      |
+| `xhr.html`          | `XMLHttpRequest` GET                    | XHR              |
+| `script.html`       | dynamic `<script src>`                 | script GET       |
+| `iframe.html`       | hidden `<iframe src>`                  | document GET     |
+
+> WebRTC IP leak is a separate network layer (UDP/STUN, bypasses the proxy) that
+> HTTP interception cannot stop — out of scope here, planned for Phase 2.
 
 ## Counter service (ready-made, no backend)
 
